@@ -1,9 +1,11 @@
 package com.alan.controller;
 
+import com.alan.common.vo.Result;
 import com.alan.entity.Account;
 import com.alan.entity.constants.Constants;
 import com.alan.entity.dto.CreateImageCode;
 import com.alan.service.AccountService;
+import com.alan.service.EmailCodeService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +25,11 @@ import java.io.IOException;
 @RestController
 @RequestMapping
 public class AccountController {
+
+
+    @Resource
+    private EmailCodeService emailCodeService;
+
     /**
      * 根据请求类型返回验证码并存入session
      *
@@ -46,6 +53,28 @@ public class AccountController {
         }
         vCode.write(response.getOutputStream());
     }
+
+    @PostMapping("sendEmailCode")
+    public Result<?> sendEmailCode(HttpSession session, String email, String checkCode, Integer type) {
+        // session.getAttribute(Constants.CHECK_CODE_KEY_EMAIL)是从session中获取的验证码
+        boolean aCase = checkCode.equalsIgnoreCase((String) session.getAttribute(Constants.CHECK_CODE_KEY_EMAIL));
+
+        try {
+            if(!aCase){
+                return Result.fail(20002,"验证码错误");
+            }
+            // 发送验证码
+            emailCodeService.sendEmailCode(email,type);
+            return Result.success("发送成功");
+        } finally {
+            //删除session中保存的验证码
+            session.removeAttribute(Constants.CHECK_CODE_KEY_EMAIL);
+        }
+    }
+
+
+
+
 
 }
 

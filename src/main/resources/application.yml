@@ -82,3 +82,7 @@ qq:
     openid: https://graph.qq.com/oauth2.0/me?access_token=%S
     user-info: https://graph.qq.com/user/get_user_info?access_token=%s&oauth_consumer_key=%s&openid=%s
   redirect: http://easypan.wuhancoder.com/qqlogincalback
+
+mybatis:
+  #配置xml文件的位置
+  mapper-locations: classpath:mapper/*.xml
