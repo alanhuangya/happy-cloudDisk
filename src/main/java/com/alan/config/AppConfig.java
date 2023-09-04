@@ -12,4 +12,10 @@ public class AppConfig {
      */
     @Value("${spring.mail.username:}")
     private String sendUserName;
+
+    /**
+     * 是否为管理员
+     */
+    @Value("${admin.emails:}")
+    private String adminEmails;
 }

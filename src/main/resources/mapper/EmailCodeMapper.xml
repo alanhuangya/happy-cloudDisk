@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.alan.mapper.EmailCodeMapper">
 
-    <resultMap type="com.alan.entity.EmailCode" id="EmailCodeMap">
+    <resultMap type="com.alan.entity.po.EmailCode" id="EmailCodeMap">
         <result property="email" column="email" jdbcType="VARCHAR"/>
         <result property="code" column="code" jdbcType="VARCHAR"/>
         <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
@@ -11,8 +11,10 @@
 
     <!--查询单个-->
     <select id="queryById" resultMap="EmailCodeMap">
-        select
-          email, code, create_time, status
+        select email,
+               code,
+               create_time,
+               status
         from email_code
         where email = #{email}
     </select>
@@ -20,7 +22,7 @@
     <!--查询指定行数据-->
     <select id="queryAllByLimit" resultMap="EmailCodeMap">
         select
-          email, code, create_time, status
+        email, code, create_time, status
         from email_code
         <where>
             <if test="email != null and email != ''">
@@ -58,11 +60,8 @@
             </if>
         </where>
     </select>
-    <select id="selectByEmailAndCode" resultType="com.alan.entity.EmailCode">
-        select email,
-               code,
-               create_time,
-               status
+    <select id="selectByEmailAndCode" resultType="com.alan.entity.po.EmailCode">
+        select *
         from email_code
         where email = #{email}
           and code = #{code}
@@ -70,15 +69,15 @@
 
     <!--新增所有列-->
     <insert id="insert" keyProperty="email" useGeneratedKeys="true">
-        insert into email_code(email,code, create_time, status)
-        values (#{email},#{code}, #{createTime}, #{status})
+        insert into email_code(email, code, create_time, status)
+        values (#{email}, #{code}, #{createTime}, #{status})
     </insert>
 
     <insert id="insertBatch" keyProperty="email" useGeneratedKeys="true">
         insert into email_code(code, create_time, status)
         values
         <foreach collection="entities" item="entity" separator=",">
-        (#{entity.code}, #{entity.createTime}, #{entity.status})
+            (#{entity.code}, #{entity.createTime}, #{entity.status})
         </foreach>
     </insert>
 
@@ -119,10 +118,18 @@
         </set>
         where email = #{email}
     </update>
+    <update id="disableEmailCode">
+        update email_code
+        set status = 1
+        where email = #{email}
+          and status = 0
+    </update>
 
     <!--通过主键删除-->
     <delete id="deleteById">
-        delete from email_code where email = #{email}
+        delete
+        from email_code
+        where email = #{email}
     </delete>
 
 </mapper>

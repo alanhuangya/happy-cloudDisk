@@ -1,8 +1,6 @@
 package com.alan.service;
 
-import com.alan.entity.Account;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import com.alan.entity.dto.SessionWebDto;
 
 /**
  * 用户信息(UserInfo)表服务接口
@@ -13,5 +11,7 @@ import org.springframework.data.domain.PageRequest;
 public interface AccountService {
 
 
+    void register(String email, String nickName, String password, String emailCode);
 
+    SessionWebDto login(String email, String password);
 }

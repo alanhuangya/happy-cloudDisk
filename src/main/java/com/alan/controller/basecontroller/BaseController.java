@@ -40,6 +40,16 @@ public class BaseController {
         return responseVO;
     }
 
+    // 自定义返回
+    protected <T> ResponseVO getResponseVO(String msg,T t) {
+        ResponseVO<T> responseVO = new ResponseVO<>();
+        responseVO.setStatus(STATUC_SUCCESS);
+        responseVO.setCode(ResponseCodeEnum.CODE_200.getCode());
+        responseVO.setInfo(msg);
+        responseVO.setData(t);
+        return responseVO;
+    }
+
 
 
 

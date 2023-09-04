@@ -1,6 +1,6 @@
 package com.alan.mapper;
 
-import com.alan.entity.EmailCode;
+import com.alan.entity.po.EmailCode;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.data.domain.Pageable;
@@ -84,5 +84,11 @@ public interface EmailCodeMapper {
     void updateStatusByEmail(@Param("email") String email, @Param("status") Integer status);
 
     EmailCode selectByEmailAndCode(@Param("email") String email, @Param("code") String code);
+
+    /**
+     * 禁用邮箱验证码
+     * @param email 邮箱
+     */
+    void disableEmailCode(@Param("email") String email);
 }
 

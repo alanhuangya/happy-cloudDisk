@@ -1,9 +1,5 @@
 package com.alan.service;
 
-import com.alan.entity.EmailCode;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-
 /**
  * 邮箱验证码(EmailCode)表服务接口
  *
@@ -13,5 +9,17 @@ import org.springframework.data.domain.PageRequest;
 public interface EmailCodeService {
 
 
+    /**
+     * 发送邮箱验证码
+     * @param email
+     * @param type
+     */
     void sendEmailCode(String email, Integer type);
+
+    /**
+     * 校验邮箱验证码
+     * @param email
+     * @param emailCode
+     */
+    void checkEmailCode(String email, String emailCode);
 }

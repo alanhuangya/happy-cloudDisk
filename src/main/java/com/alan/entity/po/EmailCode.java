@@ -1,4 +1,4 @@
-package com.alan.entity;
+package com.alan.entity.po;
 
 import java.util.Date;
 import java.io.Serializable;

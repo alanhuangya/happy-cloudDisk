@@ -36,7 +36,7 @@ public class GlobalOperationAspect {
     }
 
     @Before("requestInterceptor()")
-    public void interceptorDo(JoinPoint point) throws NoSuchMethodException {
+    public void interceptorDo(JoinPoint point) throws BusinessException {
         log.debug("拦截成功1");
         try {
             // 获取目标对象, 也就是被拦截的方法所在的类
@@ -61,10 +61,10 @@ public class GlobalOperationAspect {
             }
         }catch (BusinessException e) {
             log.error("全局拦截器异常", e);
-            throw new BusinessException(ResponseCodeEnum.CODE_500);
+            throw e;
         }catch (Exception e) {
             log.error("全局拦截器异常", e);
-            throw e;
+            throw new BusinessException(ResponseCodeEnum.CODE_500);
         } catch (Throwable e) {
             log.error("全局拦截器异常", e);
             throw new BusinessException(ResponseCodeEnum.CODE_500);
@@ -102,7 +102,7 @@ public class GlobalOperationAspect {
      */
     private void checkObjValue(Parameter parameter, Object value) {
         try{
-            // 获取参数类型，如：com.alan.entity.Account
+            // 获取参数类型，如：com.alan.entity.po.Account
             String typeName = parameter.getParameterizedType().getTypeName();
             // 根据参数类型获取Class对象,就是获取Account类的Class对象
             Class clazz = Class.forName(typeName);
@@ -153,7 +153,7 @@ public class GlobalOperationAspect {
             throw new BusinessException(ResponseCodeEnum.CODE_600);
         }
         // 校验正则
-        if (!isEmpty && StringTools.isEmpty(verifyParam.regex().getRegex())
+        if (!isEmpty && !StringTools.isEmpty(verifyParam.regex().getRegex())
                 && !VerifyUtils.verify(verifyParam.regex(), String.valueOf(value))) {
             throw new BusinessException(ResponseCodeEnum.CODE_600);
         }
