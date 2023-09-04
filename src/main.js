@@ -2,6 +2,9 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
+import Request from '@/utils/Request'
+import Message from '@/utils/Message'
+import Verify from '@/utils/Verify'
 
 // 引入element plus
 import ElementPlus from 'element-plus'
@@ -20,4 +23,12 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 app.use(ElementPlus)
 app.use(router)
 
+// 配置全局变量
+app.config.globalProperties.Request = Request;
+app.config.globalProperties.Message = Message;
+app.config.globalProperties.Verify = Verify;
+app.config.globalProperties.VueCookies = VueCookies;
+
 app.mount('#app')
+
+

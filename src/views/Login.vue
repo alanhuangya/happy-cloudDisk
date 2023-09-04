@@ -1,51 +1,86 @@
 <template>
-  <div>
+  <div class="main">
     <!-- 侧边栏照片 -->
     <el-aside class="login-img">
-      <el-image src="src/assets/login_img.png" />
+      <el-image src="src/assets/login_img.png"/>
     </el-aside>
 
     <!-- 登录面板 -->
-    <el-main class="login-panel">
-      <el-form>
+    <div class="login-panel">
+      <el-form :model="formData" :rules="rules" ref="formDataRef">
         <!-- 标题 -->
         <el-header style="text-align: center">Happy云盘</el-header>
 
         <!-- 邮箱输入 -->
-        <el-form-item :label-width="formLabelWidth">
+        <el-form-item prop="email" :label-width="formLabelWidth">
           <el-input
-            clearable
-            prefix-icon="User"
-            v-model="formData.email"
-            placeholder="请输入邮箱"
+              clearable
+              prefix-icon="User"
+              v-model="formData.email"
+              placeholder="请输入邮箱"
           />
         </el-form-item>
 
         <!-- 密码输入 -->
-        <el-form-item :label-width="formLabelWidth" v-if="opType == 1">
+        <el-form-item prop="password" :label-width="formLabelWidth" v-if="opType == 1">
           <el-input
-            type="password"
-            prefix-icon="Lock"
-            v-model="formData.password"
-            placeholder="请输入密码"
-            show-password
+              type="password"
+              prefix-icon="Lock"
+              v-model="formData.password"
+              placeholder="请输入密码"
+              show-password
           />
         </el-form-item>
 
+        <el-dialog v-model="dialogFormVisible" title="发送邮箱验证码" width="500px">
+          <el-form :rules="rules" :model="emailCodeModel" ref="emailCodeModelRef">
+            <el-form-item label="邮箱">
+              {{ formData.email }}
+            </el-form-item>
+            <el-form-item label="验证码" prop="checkCode">
+              <div class="check-code-panel">
+                <!-- 验证码输入框 -->
+                <el-input
+                    prefix-icon="CircleCheck"
+                    v-model="emailCodeModel.checkCode"
+                    placeholder="请输入验证码"
+                >
+                </el-input>
+
+                <!-- 验证码图片 -->
+                <img
+                    class="check-code"
+                    :src="checkCodeUrl4SendMail"
+                    @click="changeCheckCode(1)"
+                />
+              </div>
+            </el-form-item>
+          </el-form>
+          <template #footer>
+              <span class="dialog-footer">
+                <el-button @click="dialogFormVisible = false">取消</el-button>
+                <el-button type="primary" @click="getEmailCode">
+                  发送
+                </el-button>
+              </span>
+          </template>
+        </el-dialog>
         <!-- 注册 -->
-        <div>
-          <el-form-item>
+        <div v-if="opType == 0 || opType == 2">
+          <el-form-item prop="emailCode">
             <div class="send-email-panel">
               <el-input
-                v-model="formData.emailCode"
-                prefix-icon="CircleCheck"
-                placeholder="请输入邮箱验证码"
+                  v-model="formData.emailCode"
+                  prefix-icon="CircleCheck"
+                  placeholder="请输入邮箱验证码"
               >
               </el-input>
-              <el-button class="send-mail-btn" type="primary"
-                >获取验证码</el-button
+              <el-button class="send-mail-btn" type="primary" @click="sendEmailCode"
+              >获取验证码
+              </el-button
               >
             </div>
+
 
             <!-- 未收到验证码 -->
             <el-popover placement="left" width="500px" trigger="click">
@@ -63,53 +98,60 @@
           </el-form-item>
 
           <!-- 昵称 -->
-          <el-form-item :label-width="formLabelWidth" v-if="opType == 0">
+          <el-form-item prop="nickName" :label-width="formLabelWidth" v-if="opType == 0">
             <el-input
-              clearable
-              prefix-icon="User"
-              v-model="formData.nickName"
-              placeholder="请输入昵称"
+                clearable
+                prefix-icon="User"
+                v-model="formData.nickName"
+                placeholder="请输入昵称"
             />
           </el-form-item>
 
           <!-- 第一次密码 -->
-          <el-form-item :label-width="formLabelWidth">
+          <el-form-item prop="registerPassword" :label-width="formLabelWidth">
             <el-input
-              type="password"
-              prefix-icon="Lock"
-              v-model="formData.password"
-              placeholder="请输入密码"
-              show-password
+                type="password"
+                prefix-icon="Lock"
+                v-model="formData.registerPassword"
+                placeholder="请输入密码"
+                show-password
             />
           </el-form-item>
 
           <!-- 第二次密码 -->
-          <el-form-item :label-width="formLabelWidth" v-if="opType == 2">
+          <el-form-item
+              prop="registerPasswordAgain"
+              :label-width="formLabelWidth"
+              v-if="opType == 2 || opType == 0"
+          >
             <el-input
-              type="password"
-              prefix-icon="Lock"
-              v-model="formData.password"
-              placeholder="请再次输入密码"
-              show-password
+                type="password"
+                prefix-icon="Lock"
+                v-model="formData.registerPasswordAgain"
+                placeholder="请再次输入密码"
+                show-password
             />
           </el-form-item>
         </div>
 
         <!-- 验证码 -->
-        <el-form-item>
-          <div class="check-code-panle">
+        <el-form-item prop="checkCode">
+          <div class="check-code-panel">
             <!-- 验证码输入框 -->
             <el-input
-              prefix-icon="CircleCheck"
-              v-model="formData.checkCode"
-              placeholder="请输入验证码"
-              @keyup.enter="doSubmit"
-              style="width: 200px"
+                prefix-icon="CircleCheck"
+                v-model="formData.checkCode"
+                placeholder="请输入验证码"
+                @keyup.enter="doSubmit"
             >
             </el-input>
 
             <!-- 验证码图片 -->
-            <img class="check-code" />
+            <img
+                class="check-code"
+                :src="checkCodeUrl"
+                @click="changeCheckCode(0)"
+            />
           </div>
         </el-form-item>
 
@@ -119,19 +161,25 @@
 
           <!-- 忘记密码&没有账号 -->
           <div class="no-account">
-            <el-link :underline="false">忘记密码</el-link>
-            <el-link :underline="false">没有账号</el-link>
+            <el-link :underline="false" @click="showPanel(2)"
+            >忘记密码?
+            </el-link
+            >
+            <el-link :underline="false" @click="showPanel(0)"
+            >没有账号?
+            </el-link
+            >
           </div>
         </el-form-item>
 
         <!-- 注册(已有账号?) -->
         <el-form-item v-if="opType == 0">
-          <el-link :underline="false">已有账号?</el-link>
+          <el-link :underline="false" @click="showPanel(1)">已有账号?</el-link>
         </el-form-item>
 
         <!-- 重置密码(去登录?) -->
         <el-form-item v-if="opType == 2">
-          <el-link :underline="false">去登录？</el-link>
+          <el-link :underline="false" @click="showPanel(1)">去登录？</el-link>
         </el-form-item>
 
         <!-- 登录按钮 -->
@@ -141,29 +189,169 @@
           <span v-if="opType == 2">重置密码</span>
         </el-button>
       </el-form>
-    </el-main>
+    </div>
   </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      formLabelWidth: "0px",
-      formData: {},
-    };
-  },
+<script setup>
+import {ref, reactive, getCurrentInstance, nextTick, onMounted} from "vue";
+import md5 from "js-md5";
+
+const formLabelWidth = "0px";
+const formData = ref({});
+const formDataRef = ref();
+const {proxy} = getCurrentInstance();
+
+
+// 0:注册 1:登录 2:重置密码
+const opType = ref(1);
+
+const api = {
+  checkCode: "/api/checkCode",
+  sendEmailCode: "/sendEmailCode",
 };
+
+const checkCodeUrl = ref(api.checkCode);
+const checkCodeUrl4SendMail = ref(api.checkCode);
+
+const checkRegisterPassword = (rule, value, callback) => {
+  if (value !== formData.value.registerPassword) {
+    callback(new Error(rule.message));
+  } else {
+    callback();
+  }
+};
+
+const dialogFormVisible = ref(false);
+const emailCodeModel = ref({});
+const emailCodeModelRef = ref();
+
+const getEmailCode = () => {
+  emailCodeModelRef.value.validate(async (valid) => {
+    if (!valid) {
+      return;
+    }
+    const params = {
+      email: emailCodeModel.value.email,
+      checkCode: emailCodeModel.value.checkCode,
+      type: opType.value === 0 ? 0 : 1,
+    };
+    let request = await proxy.Request({
+      url: api.sendEmailCode,
+      params: params,
+      errorCallback: () => {
+        changeCheckCode(1);
+      }
+    });
+    console.log(request);
+    if (!request) {
+      return;
+    }
+    proxy.Message.success("验证码已发送，请登录邮箱查看");
+    dialogFormVisible.value = false;
+  });
+}
+
+const sendEmailCode = () => {
+  formDataRef.value.validateField("email", (valid) => {
+    if (!valid) {
+      return;
+    }
+    dialogFormVisible.value = true;
+    nextTick(() => {
+      changeCheckCode(1);
+      emailCodeModelRef.value.resetFields();
+      emailCodeModel.value = {
+        email: formData.value.email,
+      };
+    })
+  });
+};
+
+
+//输入框的规则
+const rules = reactive({
+  email: [
+    {required: true, message: "请输入邮箱", trigger: "blur"},
+    {
+      type: "email",
+      message: "请输入正确的邮箱地址",
+      trigger: ["blur", "change"],
+    },
+  ],
+
+  password: [
+    {required: true, message: "请输入密码", trigger: "blur"},
+    {min: 6, max: 20, message: "密码长度在 6 到 20 个字符", trigger: "blur"},
+  ],
+
+  registerPassword: [
+    {required: true, message: "请输入密码", trigger: "blur"},
+    {
+      validator: proxy.Verify.password,
+      message: "密码只能是数字，字母，特殊字符 8-18位",
+    },
+  ],
+
+  //判断两次密码是否一致
+  registerPasswordAgain: [
+    {required: true, message: "请再次输入密码", trigger: "blur"},
+    {
+      validator: checkRegisterPassword,
+      message: "两次输入的密码不一致",
+      trigger: ["blur", "change"],
+    }
+  ],
+
+  checkCode: [
+    {required: true, message: "请输入验证码", trigger: "blur"},
+    {min: 5, max: 5, message: "验证码长度为5个字符", trigger: "blur"},
+  ],
+  emailCode: [
+    {required: true, message: "请输入邮箱验证码", trigger: "blur"},
+    {min: 5, max: 5, message: "邮箱验证码长度为5个字符", trigger: "blur"},
+  ],
+  nickName: [
+    {required: true, message: "请输入昵称", trigger: "blur"},
+    {min: 2, max: 20, message: "昵称长度在 2 到 20 个字符", trigger: "blur"},
+  ],
+});
+
+
+const changeCheckCode = (type) => {
+  //注册
+  if (type == 0) {
+    checkCodeUrl.value =
+        api.checkCode + "?type=" + type + "&time=" + new Date().getTime();
+  } else {
+    checkCodeUrl4SendMail.value =
+        api.checkCode + "?type=" + type + "&time=" + new Date().getTime();
+  }
+};
+
+const showPanel = (type) => {
+  opType.value = type;
+};
+
 </script>
 <style lang="scss">
 $defult-height: 40px;
+$bg-img-url: "../assets/login_img.png";
+
+.main {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 
 /* 侧边栏照片 */
 .login-img {
-  width: auto;
-  height: auto;
-  margin-top: 10px;
-  float: left;
+  //调整图片为80%
+  width: 60%;
+
 }
 
 /* 登录面板 */
@@ -172,8 +360,9 @@ $defult-height: 40px;
   border: 1px solid #ccc;
   border-radius: 10px;
   width: 450px;
-  margin: 0 auto;
   float: right;
+  padding: 20px;
+  margin-right: 100px;
 }
 
 .el-input {
@@ -195,9 +384,21 @@ $defult-height: 40px;
   display: flex;
   width: 100%;
   justify-content: space-between;
+
   .send-mail-btn {
     margin-left: 10px;
     height: $defult-height;
+  }
+}
+
+// 验证码面板
+.check-code-panel {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+
+  .check-code {
+    margin-left: 10px;
   }
 }
 </style>
