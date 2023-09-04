@@ -1,4 +1,4 @@
-package com.alan.dao;
+package com.alan.mapper;
 
 import com.alan.entity.Account;
 import org.apache.ibatis.annotations.Mapper;

@@ -1,14 +1,14 @@
 package com.alan.controller;
 
-import com.alan.common.vo.Result;
-import com.alan.entity.Account;
+import com.alan.annotation.GlobalInterceptor;
+import com.alan.annotation.VerifyParam;
+import com.alan.controller.basecontroller.BaseController;
+import com.alan.entity.enums.VerifyRegexEnum;
+import com.alan.entity.vo.ResponseVO;
 import com.alan.entity.constants.Constants;
 import com.alan.entity.dto.CreateImageCode;
-import com.alan.service.AccountService;
+import com.alan.exception.BusinessException;
 import com.alan.service.EmailCodeService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -24,7 +24,7 @@ import java.io.IOException;
  */
 @RestController
 @RequestMapping
-public class AccountController {
+public class AccountController extends BaseController {
 
 
     @Resource
@@ -54,27 +54,35 @@ public class AccountController {
         vCode.write(response.getOutputStream());
     }
 
+    /**
+     * 获取邮箱验证码
+     *
+     * @param session   用于获取session中的验证码
+     * @param email     邮箱
+     * @param checkCode 验证码
+     * @param type      0:注册  1:找回密码
+     * @return
+     */
     @PostMapping("sendEmailCode")
-    public Result<?> sendEmailCode(HttpSession session, String email, String checkCode, Integer type) {
-        // session.getAttribute(Constants.CHECK_CODE_KEY_EMAIL)是从session中获取的验证码
-        boolean aCase = checkCode.equalsIgnoreCase((String) session.getAttribute(Constants.CHECK_CODE_KEY_EMAIL));
+    @GlobalInterceptor(checkParams = true)
+    public ResponseVO sendEmailCode(HttpSession session,
+                                    @VerifyParam(required = true, regex = VerifyRegexEnum.EMAIL) String email,
+                                    @VerifyParam(required = true) String checkCode,
+                                    @VerifyParam(required = true) Integer type) {
 
         try {
-            if(!aCase){
-                return Result.fail(20002,"验证码错误");
+            // 如果验证码错误
+            if (!checkCode.equals(session.getAttribute(Constants.CHECK_CODE_KEY_EMAIL))) {
+                return getErrorResponseVO("验证码错误");
             }
-            // 发送验证码
-            emailCodeService.sendEmailCode(email,type);
-            return Result.success("发送成功");
+            // 如果验证码正确，发送邮箱验证码
+            emailCodeService.sendEmailCode(email, type);
+            return getSuccessResponseVO("验证码发送成功");
         } finally {
-            //删除session中保存的验证码
+            // 无论是否发送成功，都要清除session中的验证码
             session.removeAttribute(Constants.CHECK_CODE_KEY_EMAIL);
         }
     }
-
-
-
-
 
 }
 

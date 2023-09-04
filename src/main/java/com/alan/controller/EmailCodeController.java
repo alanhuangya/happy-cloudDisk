@@ -19,6 +19,5 @@ import javax.annotation.Resource;
 @RequestMapping("emailCode")
 public class EmailCodeController {
 
-
 }
 

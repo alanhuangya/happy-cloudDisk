@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.alan.dao.EmailCodeMapper">
+<mapper namespace="com.alan.mapper.EmailCodeMapper">
 
     <resultMap type="com.alan.entity.EmailCode" id="EmailCodeMap">
         <result property="email" column="email" jdbcType="VARCHAR"/>
@@ -57,6 +57,15 @@
                 and status = #{status}
             </if>
         </where>
+    </select>
+    <select id="selectByEmailAndCode" resultType="com.alan.entity.EmailCode">
+        select email,
+               code,
+               create_time,
+               status
+        from email_code
+        where email = #{email}
+          and code = #{code}
     </select>
 
     <!--新增所有列-->

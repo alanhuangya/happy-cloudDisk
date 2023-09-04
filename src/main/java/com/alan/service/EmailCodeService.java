@@ -13,6 +13,5 @@ import org.springframework.data.domain.PageRequest;
 public interface EmailCodeService {
 
 
-
     void sendEmailCode(String email, Integer type);
 }

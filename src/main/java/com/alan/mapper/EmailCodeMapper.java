@@ -1,4 +1,4 @@
-package com.alan.dao;
+package com.alan.mapper;
 
 import com.alan.entity.EmailCode;
 import org.apache.ibatis.annotations.Mapper;
@@ -82,5 +82,7 @@ public interface EmailCodeMapper {
     int deleteById(String email);
 
     void updateStatusByEmail(@Param("email") String email, @Param("status") Integer status);
+
+    EmailCode selectByEmailAndCode(@Param("email") String email, @Param("code") String code);
 }
 

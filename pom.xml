@@ -26,9 +26,10 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <skipTests>true</skipTests>
 
-        <springboot.version>2.6.1</springboot.version>
         <mybatis.version>1.3.2</mybatis.version>
+        <springboot.version>2.6.1</springboot.version>
         <logback.version>1.2.10</logback.version>
+        <aspectjweaver.version>1.9.4</aspectjweaver.version>
         <mysql.version>8.0.23</mysql.version>
         <aspectjweaver.version>1.9.4</aspectjweaver.version>
         <fastjson.version>1.2.66</fastjson.version>
@@ -64,6 +65,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
             <version>${springboot.version}</version>
+        </dependency>
+
+        <!-- AOP -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>${aspectjweaver.version}</version>
         </dependency>
 
         <!--mybatis-->
