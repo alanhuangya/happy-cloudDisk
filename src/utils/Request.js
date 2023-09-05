@@ -12,7 +12,7 @@ let loading = null;
 // 创建axios实例
 const instance = axios.create({
     baseURL: '/api',
-    timeout: 10 * 1000,
+    timeout: 30 * 1000,
 })
 
 // 请求前拦截器，用于处理需要在请求前的操作
@@ -65,7 +65,6 @@ instance.interceptors.response.use(
             router.push("login?redirectUrl=" + encodeURI(router.currentRoute.value.path));
             return Promise.reject({showError: false, msg: "登录超时"});
         } else {
-            debugger;
             // 其他错误
             if (errorCallback) {
                 // 如果有错误回调，则执行

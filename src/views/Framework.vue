@@ -1,5 +1,8 @@
 <template>
-  <div>首页</div>
+  <div class="framework">
+    <div class="header"></div>
+    <div class="body"></div>
+  </div>
 </template>
 
 <script setup>

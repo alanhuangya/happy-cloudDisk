@@ -183,7 +183,7 @@
         </el-form-item>
 
         <!-- 登录按钮 -->
-        <el-button type="primary" style="width: 100%; height: 40px">
+        <el-button type="primary" style="width: 100%; height: 40px" @click="doSubmit">
           <span v-if="opType == 0">注册</span>
           <span v-if="opType == 1">登录</span>
           <span v-if="opType == 2">重置密码</span>
@@ -195,13 +195,19 @@
 
 <script setup>
 import {ref, reactive, getCurrentInstance, nextTick, onMounted} from "vue";
+import {useRouter, useRoute} from "vue-router";
 import md5 from "js-md5";
 
+const router = useRouter();
+const route = useRoute();
 const formLabelWidth = "0px";
 const formData = ref({});
 const formDataRef = ref();
 const {proxy} = getCurrentInstance();
 
+onMounted(() => {
+  showPanel(1);
+});
 
 // 0:注册 1:登录 2:重置密码
 const opType = ref(1);
@@ -209,6 +215,9 @@ const opType = ref(1);
 const api = {
   checkCode: "/api/checkCode",
   sendEmailCode: "/sendEmailCode",
+  login: "/login",
+  register: "/register",
+  resetPwd: "/resetPwd",
 };
 
 const checkCodeUrl = ref(api.checkCode);
@@ -231,11 +240,13 @@ const getEmailCode = () => {
     if (!valid) {
       return;
     }
+    console.log(opType.value);
     const params = {
       email: emailCodeModel.value.email,
       checkCode: emailCodeModel.value.checkCode,
       type: opType.value === 0 ? 0 : 1,
     };
+    console.log(params)
     let request = await proxy.Request({
       url: api.sendEmailCode,
       params: params,
@@ -243,13 +254,86 @@ const getEmailCode = () => {
         changeCheckCode(1);
       }
     });
-    console.log(request);
     if (!request) {
       return;
     }
     proxy.Message.success("验证码已发送，请登录邮箱查看");
     dialogFormVisible.value = false;
   });
+}
+
+
+const doSubmit = () => {
+  formDataRef.value.validate(async (valid) => {
+    if (!valid) {
+      return;
+    }
+    let params = {};
+    //assign() 方法用于将所有可枚举属性的值从一个或多个源对象复制到目标对象。它将返回目标对象。
+    Object.assign(params, formData.value);
+
+    // 注册&找回密码
+    if (opType.value === 0 || opType.value === 2) {
+      // 注册，将注册密码赋值给密码，删除注册密码
+      params.password = params.registerPassword;
+      delete params.registerPassword;
+      delete params.registerPasswordAgain;
+    }
+    // 登录
+    if (opType.value === 1) {
+      // 如果密码不是cookie中的密码，就md5加密
+      let cookieLoginInfo = proxy.VueCookies.get("loginInfo");
+      let cookiePassword =
+          cookieLoginInfo == null ? null : cookieLoginInfo.password;
+      if (params.password !== cookiePassword) {
+        params.password = md5(params.password);
+      }
+    }
+    let url = api.null;
+    if (opType.value === 0) {
+      url = api.register;
+    } else if (opType.value === 1) {
+      url = api.login;
+    } else if (opType.value === 2) {
+      url = api.resetPwd;
+    }
+    let result = await proxy.Request({
+      url: url,
+      params: params,
+      errorCallback: () => {
+        changeCheckCode(0);
+      }
+    });
+    if (!result) {
+      return;
+    }
+    if (opType.value == 0) {
+      proxy.Message.success("注册成功,请登录");
+      showPanel(1);
+    } else if (opType.value == 1) {
+      if (params.rememberMe) {
+        // 记住密码
+        const loginInfo = {
+          email: params.email,
+          password: params.password,
+          rememberMe: params.rememberMe,
+        };
+        // 保存到cookie,7天
+        proxy.VueCookies.set("loginInfo", loginInfo, "7d");
+      } else {
+        proxy.VueCookies.remove("loginInfo");
+      }
+      proxy.Message.success("登录成功");
+      // 存储cookies
+      proxy.VueCookies.set("userInfo", result.data, 0);
+      // 跳转到首页
+      router.push("/");
+    } else if (opType.value == 2) {
+      proxy.Message.success("重置密码成功,请登录");
+      showPanel(1);
+    }
+
+  })
 }
 
 const sendEmailCode = () => {
@@ -331,7 +415,30 @@ const changeCheckCode = (type) => {
 
 const showPanel = (type) => {
   opType.value = type;
+  resetForm();
 };
+
+/**
+ * 重置表单
+ */
+const resetForm = () => {
+  // 更新验证码
+  changeCheckCode(0);
+  formDataRef.value.resetFields();
+  formData.value = {};
+
+  // 登录
+  if (opType.value == 1) {
+    const cookieLoginInfo = proxy.VueCookies.get("loginInfo");
+    if (cookieLoginInfo) {
+      // md5解密，因为cookie中的密码是加密的
+      // cookieLoginInfo.password = md5(cookieLoginInfo.password);
+      //json格式打印
+      console.log(JSON.stringify(cookieLoginInfo));
+      formData.value = cookieLoginInfo;
+    }
+  }
+}
 
 </script>
 <style lang="scss">
