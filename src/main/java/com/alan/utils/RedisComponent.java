@@ -44,4 +44,26 @@ public class RedisComponent {
                 userSpaceDto, Constants.REDIS_KEY_EXPIRES_DAY);
     }
 
+    /**
+     * 获取已使用的空间
+     *
+     * @param userId
+     */
+    public UserSpaceDto getUserSpaceUse(String userId) {
+        UserSpaceDto userSpaceDto = (UserSpaceDto) redisUtils.get(Constants.REDIS_KEY_USER_SPACE_USE + userId);
+        if (userSpaceDto == null) {
+            userSpaceDto = new UserSpaceDto();
+
+            //TODO:查询用户用户已经上传文件大小的总和
+
+            // 设置默认值
+            userSpaceDto.setUseSpace(0L);
+            userSpaceDto.setTotalSpace(getSysSettingsDto().getUserInitUseSpace() * Constants.MB);
+
+            // 保存到redis
+            saveUserSpaceUse(userId, userSpaceDto);
+        }
+        return userSpaceDto;
+    }
+
 }

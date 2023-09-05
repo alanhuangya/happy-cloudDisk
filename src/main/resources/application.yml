@@ -61,7 +61,7 @@ spring:
     timeout: 2000
 
 project:
-  folder: e:/webser/myapps/happyCloudDisk/
+  folder: e:/Project/happy-cloudDisk/cloudDisk-backend
 
 log:
   root:

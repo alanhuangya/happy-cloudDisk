@@ -10,7 +10,7 @@
     <springProperty scope="context" name="log.root.level" source="log.root.level"/>
 
     <property name="LOG_FOLDER" value="logs"/>
-    <property name="LOG_FILE_NAME" value="happy-cloudDisk.log"/>
+    <property name="LOG_FILE_NAME" value="cloudDisk.log"/>
 
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
 

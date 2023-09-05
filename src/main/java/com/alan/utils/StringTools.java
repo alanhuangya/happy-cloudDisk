@@ -76,6 +76,11 @@ public class StringTools {
         return content;
     }
 
+    /**
+     * 判断路径是否合法
+     * @param path
+     * @return
+     */
     public static boolean pathIsOk(String path) {
         if (StringTools.isEmpty(path)) {
             return true;

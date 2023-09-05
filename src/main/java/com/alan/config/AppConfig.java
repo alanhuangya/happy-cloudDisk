@@ -18,4 +18,17 @@ public class AppConfig {
      */
     @Value("${admin.emails:}")
     private String adminEmails;
+
+    /**
+     * 是否为管理员
+     */
+    @Value("${dev:false}")
+    private Boolean dev;
+
+
+    /**
+     * 项目文件夹
+     */
+    @Value("${project.folder:}")
+    private String projectFolder;
 }

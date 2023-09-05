@@ -1,8 +1,10 @@
 package com.alan.controller.basecontroller;
 
 import com.alan.entity.constants.Constants;
+import com.alan.entity.dto.SessionWebUserDto;
 import com.alan.entity.enums.ResponseCodeEnum;
 import com.alan.entity.vo.ResponseVO;
+import com.alan.utils.StringTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +50,59 @@ public class BaseController {
         responseVO.setInfo(msg);
         responseVO.setData(t);
         return responseVO;
+    }
+
+    // 读取文件
+    protected void readFile(HttpServletResponse response, String filePath) {
+        // 判断文件路径是否合法
+        if(!StringTools.pathIsOk(filePath)){
+            return;
+        }
+        OutputStream out = null;
+        FileInputStream in = null;
+        try {
+            File file = new File(filePath);
+            // 判断文件是否存在
+            if (!file.exists()) {
+                return;
+            }
+
+            in = new FileInputStream(file);
+            byte[] byteData = new byte[1024];
+            out = response.getOutputStream();
+            int len = 0;
+            while ((len = in.read(byteData)) != -1) {
+                out.write(byteData, 0, len);
+            }
+            out.flush();
+        }catch (Exception e) {
+            logger.error("读取文件失败，文件路径：{}", filePath, e);
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    logger.error("IO异常", e);
+                }
+            }
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    logger.error("IO异常", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * 从session中获取用户信息
+     * @param session
+     * @return
+     */
+    protected SessionWebUserDto getUserInfoFromSession(HttpSession session) {
+        SessionWebUserDto sessionWebUserDto = (SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY);
+        return sessionWebUserDto;
     }
 
 

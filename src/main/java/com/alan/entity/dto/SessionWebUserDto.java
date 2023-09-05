@@ -6,7 +6,7 @@ import lombok.Data;
  * session中的用户信息
  */
 @Data
-public class SessionWebDto {
+public class SessionWebUserDto {
     /**
      * 用户昵称
      */

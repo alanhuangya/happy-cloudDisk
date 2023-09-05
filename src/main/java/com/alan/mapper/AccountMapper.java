@@ -21,6 +21,14 @@ public interface AccountMapper<T,P> extends BaseMapper<T,P>{
 
     void insert(Account account);
 
+    /**
+     * 根据用户id修改用户信息
+     * @param t
+     * @param userId
+     * @return
+     */
     Integer updateByUserId(@Param("bean") T t, @Param("userId") String userId);
+
+    void updateByEmail(@Param("bean") T t,@Param("email") String email);
 }
 

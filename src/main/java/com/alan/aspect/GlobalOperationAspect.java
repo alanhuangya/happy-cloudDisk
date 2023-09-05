@@ -2,9 +2,10 @@ package com.alan.aspect;
 
 import com.alan.annotation.GlobalInterceptor;
 import com.alan.annotation.VerifyParam;
+import com.alan.config.AppConfig;
 import com.alan.entity.enums.ResponseCodeEnum;
-import com.alan.entity.enums.VerifyRegexEnum;
 import com.alan.exception.BusinessException;
+import com.alan.service.AccountService;
 import com.alan.utils.StringTools;
 import com.alan.utils.VerifyUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
-import javax.swing.text.StyledEditorKit;
+import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -26,6 +27,12 @@ import java.lang.reflect.Parameter;
 @Slf4j // 日志
 public class GlobalOperationAspect {
     private static final String[] TYPE_BASE = {"java.lang.String", "java.lang.Integer", "java.lang.Long"};
+
+    @Resource
+    private AppConfig appConfig;
+
+    @Resource
+    private AccountService accountService;
 
     /**
      * 定义切入点, 拦截所有被@GlobalInterceptor注解的方法
@@ -94,6 +101,21 @@ public class GlobalOperationAspect {
         }
 
     }
+
+    ////校验登录
+    //private void checkLogin(Boolean checkAdmin) {
+    //    // 1.获取request对象
+    //    HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+    //    // 2.获取session对象
+    //    HttpSession session = request.getSession();
+    //    // 3.从session中获取用户信息
+    //    SessionWebUserDto sessionUser = (SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY);
+    //    // 4.如果session中没有用户信息, 则抛出异常
+    //    if (session == null && appConfig.getDev() != null && appConfig.getDev()) {
+    //        accountService
+    //    }
+    //
+    //}
 
     /**
      * 校验对象，如：Account

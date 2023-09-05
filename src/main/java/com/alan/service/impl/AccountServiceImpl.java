@@ -1,7 +1,7 @@
 package com.alan.service.impl;
 
 import com.alan.config.AppConfig;
-import com.alan.entity.dto.SessionWebDto;
+import com.alan.entity.dto.SessionWebUserDto;
 import com.alan.entity.dto.UserSpaceDto;
 import com.alan.entity.po.Account;
 import com.alan.entity.constants.Constants;
@@ -74,7 +74,7 @@ public class AccountServiceImpl implements AccountService {
         account.setUserId(userId);
         account.setEmail(email);
         account.setNickName(nickName);
-        account.setPassword(password);
+        account.setPassword(StringTools.encodeByMD5(password));
         account.setJoinTime(new Date());
         account.setUseSpace(0L);
         account.setStatus(UserStatusEnum.ENABLE.getStatus());
@@ -88,7 +88,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public SessionWebDto login(String email, String password) {
+    public SessionWebUserDto login(String email, String password) {
         // 1.根据邮箱查询用户
         Account account = accountMapper.selectAccountByEmail(email);
         if (account == null || !account.getPassword().equals(password)) {
@@ -108,25 +108,48 @@ public class AccountServiceImpl implements AccountService {
         accountMapper.updateByUserId(updateAccount, userId);
 
         // 5.封装sessionWebDto
-        SessionWebDto sessionWebDto = new SessionWebDto();
-        sessionWebDto.setUserId(userId);
-        sessionWebDto.setNickName(account.getNickName());
+        SessionWebUserDto sessionWebUserDto = new SessionWebUserDto();
+        sessionWebUserDto.setUserId(userId);
+        sessionWebUserDto.setNickName(account.getNickName());
 
         // 6.判断是不是管理员，可能有多个管理员
         if (ArrayUtils.contains(appConfig.getAdminEmails().split(","), email)) {
-            sessionWebDto.setIsAdmin(true);
+            sessionWebUserDto.setIsAdmin(true);
         } else {
-            sessionWebDto.setIsAdmin(false);
+            sessionWebUserDto.setIsAdmin(false);
         }
         // 7.用户空间
         UserSpaceDto userSpaceDto = new UserSpaceDto();
-        //userSpaceDto.setUseSpace(); TODO:文件
+
+        //TODO:查询用户用户已经上传文件大小的总和
 
         userSpaceDto.setTotalSpace(userSpaceDto.getTotalSpace());
 
         // 8.保存用户空间
         redisComponent.saveUserSpaceUse(userId, userSpaceDto);
 
-        return sessionWebDto;
+        return sessionWebUserDto;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void resetPwd(String email, String password, String emailCode) {
+        // 1.根据邮箱查询用户
+        Account account = accountMapper.selectAccountByEmail(email);
+        if (account == null) {
+            throw new BusinessException("邮箱账号不存在");
+        }
+        // 2.校验邮箱验证码
+        emailCodeService.checkEmailCode(email, emailCode);
+        // 3.更新密码
+        Account updateAccount = new Account();
+        updateAccount.setPassword(StringTools.encodeByMD5(password));
+        accountMapper.updateByEmail(updateAccount, email);
+
+    }
+
+    @Override
+    public Integer updateUserInfoByUserId(Account account, String userId) {
+        return accountMapper.updateByUserId(account, userId);
     }
 }
