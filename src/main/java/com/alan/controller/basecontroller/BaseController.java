@@ -3,7 +3,9 @@ package com.alan.controller.basecontroller;
 import com.alan.entity.constants.Constants;
 import com.alan.entity.dto.SessionWebUserDto;
 import com.alan.entity.enums.ResponseCodeEnum;
+import com.alan.entity.vo.PaginationResultVO;
 import com.alan.entity.vo.ResponseVO;
+import com.alan.utils.CopyTools;
 import com.alan.utils.StringTools;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,6 +106,32 @@ public class BaseController {
         SessionWebUserDto sessionWebUserDto = (SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY);
         return sessionWebUserDto;
     }
+
+    /**
+     * 将源分页对象转换为目标分页对象
+     * @param result 源分页对象
+     * @param classz 目标分页对象的泛型
+     * @return 目标分页对象
+     * @param <S> 源分页对象的泛型
+     * @param <T> 目标分页对象的泛型
+     */
+    protected <S,T>PaginationResultVO<T> convert2PaginationVO(PaginationResultVO<S> result, Class<T> classz) {
+        // 创建一个分页结果对象
+        PaginationResultVO<T> resultVO = new PaginationResultVO<>();
+
+        // 将源list转换为目标list，因为源list和目标list的泛型不一样，所以需要手动转换
+        resultVO.setList(CopyTools.copyList(result.getList(), classz));
+
+        // 将源list的其他属性赋值给目标list
+        resultVO.setPageNo(result.getPageNo());
+        resultVO.setPageSize(result.getPageSize());
+        resultVO.setPageTotal(result.getPageTotal());
+        resultVO.setTotalCount(result.getTotalCount());
+
+        return resultVO;
+    }
+
+
 
 
 

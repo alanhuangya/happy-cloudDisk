@@ -1,6 +1,6 @@
 package com.alan.service.impl;
 
-import com.alan.config.AppConfig;
+import com.alan.entity.config.AppConfig;
 import com.alan.entity.dto.SessionWebUserDto;
 import com.alan.entity.dto.UserSpaceDto;
 import com.alan.entity.po.Account;
@@ -9,6 +9,7 @@ import com.alan.entity.dto.SysSettingsDto;
 import com.alan.entity.enums.UserStatusEnum;
 import com.alan.exception.BusinessException;
 import com.alan.mapper.AccountMapper;
+import com.alan.mapper.FileInfoMapper;
 import com.alan.service.AccountService;
 import com.alan.service.EmailCodeService;
 import com.alan.utils.RedisComponent;
@@ -22,7 +23,7 @@ import javax.annotation.Resource;
 import java.util.Date;
 
 /**
- * 用户信息(UserInfo)表服务实现类
+ * 用户信息(Account)表服务实现类
  *
  * @author makejava
  * @since 2023-08-28 22:05:32
@@ -39,6 +40,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Resource
     private RedisComponent redisComponent;
+
+    @Resource
+    private FileInfoMapper fileInfoMapper;
 
     @Resource
     private AppConfig appConfig;
@@ -69,7 +73,8 @@ public class AccountServiceImpl implements AccountService {
         }
         // 4.注册
         // 4.1 获取随机id，设置用户id
-        String userId = StringTools.getRandomString(Constants.LENGTH_10);
+        String userId = StringTools.getRandomNumber(Constants.LENGTH_10);
+
         Account account = new Account();
         account.setUserId(userId);
         account.setEmail(email);
@@ -121,9 +126,9 @@ public class AccountServiceImpl implements AccountService {
         // 7.用户空间
         UserSpaceDto userSpaceDto = new UserSpaceDto();
 
-        //TODO:查询用户用户已经上传文件大小的总和
-
-        userSpaceDto.setTotalSpace(userSpaceDto.getTotalSpace());
+        Long useSpace = fileInfoMapper.selectUseSpace(account.getUserId());
+        userSpaceDto.setUseSpace(useSpace);
+        userSpaceDto.setTotalSpace(account.getTotalSpace());
 
         // 8.保存用户空间
         redisComponent.saveUserSpaceUse(userId, userSpaceDto);
@@ -149,7 +154,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Integer updateUserInfoByUserId(Account account, String userId) {
-        return accountMapper.updateByUserId(account, userId);
+    public void updateUserInfoByUserId(Account account, String userId) {
+        accountMapper.updateByUserId(account, userId);
     }
 }

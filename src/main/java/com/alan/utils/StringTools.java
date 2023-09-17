@@ -21,6 +21,11 @@ public class StringTools {
         return false;
     }
 
+    /**
+     * 获取文件后缀名
+     * @param fileName 文件名
+     * @return
+     */
     public static String getFileSuffix(String fileName) {
         Integer index = fileName.lastIndexOf(".");
         if (index == -1) {

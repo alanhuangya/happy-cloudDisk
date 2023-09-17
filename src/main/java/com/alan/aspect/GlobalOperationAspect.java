@@ -2,12 +2,15 @@ package com.alan.aspect;
 
 import com.alan.annotation.GlobalInterceptor;
 import com.alan.annotation.VerifyParam;
-import com.alan.config.AppConfig;
+import com.alan.entity.config.AppConfig;
+import com.alan.entity.constants.Constants;
+import com.alan.entity.dto.SessionWebUserDto;
 import com.alan.entity.enums.ResponseCodeEnum;
 import com.alan.exception.BusinessException;
 import com.alan.service.AccountService;
 import com.alan.utils.StringTools;
 import com.alan.utils.VerifyUtils;
+import io.netty.util.Constant;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.aspectj.lang.JoinPoint;
@@ -16,8 +19,12 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -42,6 +49,11 @@ public class GlobalOperationAspect {
     private void requestInterceptor() {
     }
 
+    /**
+     * 拦截器具体实现, 在被@GlobalInterceptor注解的方法执行之前执行
+     * @param point 切入点，可以获取被拦截的方法的信息
+     * @throws BusinessException
+     */
     @Before("requestInterceptor()")
     public void interceptorDo(JoinPoint point) throws BusinessException {
         log.debug("拦截成功1");
@@ -62,19 +74,45 @@ public class GlobalOperationAspect {
             if (interceptor == null) {
                 return;
             }
-            // 如果注解不为空, 则执行拦截逻辑
+
+            // 校验登录
+            if (interceptor.checkLogin() || interceptor.checkAdmin()) {
+                checkLogin(interceptor.checkAdmin());
+            }
+
+            // 校验参数
             if (interceptor.checkParams()) {
                 validateParams(method, arguments);
             }
-        }catch (BusinessException e) {
+        } catch (BusinessException e) {
             log.error("全局拦截器异常", e);
             throw e;
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("全局拦截器异常", e);
             throw new BusinessException(ResponseCodeEnum.CODE_500);
         } catch (Throwable e) {
             log.error("全局拦截器异常", e);
             throw new BusinessException(ResponseCodeEnum.CODE_500);
+        }
+    }
+
+    // 校验登录
+    private  void checkLogin(Boolean checkAdmin) {
+        // 获取请求对象, 从请求对象中获取session
+        HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+        HttpSession session = request.getSession();
+
+        // 从session中获取用户信息
+        SessionWebUserDto webUserDto = (SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY);
+
+        // 如果用户信息为空, 则抛出异常
+        if (webUserDto == null) {
+            throw new BusinessException(ResponseCodeEnum.CODE_901);
+        }
+
+        // 如果需要校验管理员, 且当前用户不是管理员, 则抛出异常
+        if(checkAdmin && !webUserDto.getIsAdmin()){
+            throw new BusinessException(ResponseCodeEnum.CODE_404);
         }
     }
 
@@ -102,28 +140,15 @@ public class GlobalOperationAspect {
 
     }
 
-    ////校验登录
-    //private void checkLogin(Boolean checkAdmin) {
-    //    // 1.获取request对象
-    //    HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-    //    // 2.获取session对象
-    //    HttpSession session = request.getSession();
-    //    // 3.从session中获取用户信息
-    //    SessionWebUserDto sessionUser = (SessionWebUserDto) session.getAttribute(Constants.SESSION_KEY);
-    //    // 4.如果session中没有用户信息, 则抛出异常
-    //    if (session == null && appConfig.getDev() != null && appConfig.getDev()) {
-    //        accountService
-    //    }
-    //
-    //}
 
     /**
      * 校验对象，如：Account
+     *
      * @param parameter 参数
-     * @param value 参数值
+     * @param value     参数值
      */
     private void checkObjValue(Parameter parameter, Object value) {
-        try{
+        try {
             // 获取参数类型，如：com.alan.entity.po.Account
             String typeName = parameter.getParameterizedType().getTypeName();
             // 根据参数类型获取Class对象,就是获取Account类的Class对象

@@ -33,6 +33,11 @@ public class RedisUtils<V> {
         }
     }
 
+    /**
+     * 获取缓存
+     * @param key
+     * @return
+     */
     public V get(String key) {
         return key == null ? null : redisTemplate.opsForValue().get(key);
     }

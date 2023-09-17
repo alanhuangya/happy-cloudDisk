@@ -67,10 +67,37 @@
           and code = #{code}
     </select>
 
-    <!--新增所有列-->
-    <insert id="insert" keyProperty="email" useGeneratedKeys="true">
-        insert into email_code(email, code, create_time, status)
-        values (#{email}, #{code}, #{createTime}, #{status})
+    <!-- 插入 （匹配有值的字段）-->
+    <insert id="insert" parameterType="com.alan.entity.po.EmailCode">
+        INSERT INTO email_code
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="bean.email != null">
+                email,
+            </if>
+            <if test="bean.code != null">
+                code,
+            </if>
+            <if test="bean.createTime != null">
+                create_time,
+            </if>
+            <if test="bean.status != null">
+                status,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="bean.email!=null">
+                #{bean.email},
+            </if>
+            <if test="bean.code!=null">
+                #{bean.code},
+            </if>
+            <if test="bean.createTime!=null">
+                #{bean.createTime},
+            </if>
+            <if test="bean.status!=null">
+                #{bean.status},
+            </if>
+        </trim>
     </insert>
 
     <insert id="insertBatch" keyProperty="email" useGeneratedKeys="true">

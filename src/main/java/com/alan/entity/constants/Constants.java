@@ -56,19 +56,19 @@ public class Constants {
 
     public static final String REDIS_KEY_USER_SPACE_USE = "cloudDisk:user:spaceuse:";
 
-    public static final String REDIS_KEY_USER_FILE_TEMP_SIZE = "easypan:user:file:temp";
+    public static final String REDIS_KEY_USER_FILE_TEMP_SIZE = "cloudDisk:user:file:temp";
 
     public static final String SESSION_KEY = "session_key";
 
     // 头像
     public static final String AVATAR_SUFFIX = ".jpg";
 
-    public static final String FILE_FOLDER_AVATAR_NAME = "/avatar";
+    public static final String FILE_FOLDER_AVATAR_NAME = "/avatar/";
 
     public static final String AVATAR_DEFUALT = "/default_avatar.jpg";
 
     public static final String FILE_FOLDER_FILE = "/file";
-    public static final String FILE_FOLDER_TEMP = "/temp";
+    public static final String FILE_FOLDER_TEMP = "/temp/";
 
     public static final String ORDER_RULE = "folder_type desc, last_update_time desc";
 

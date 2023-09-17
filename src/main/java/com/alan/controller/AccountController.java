@@ -2,7 +2,7 @@ package com.alan.controller;
 
 import com.alan.annotation.GlobalInterceptor;
 import com.alan.annotation.VerifyParam;
-import com.alan.config.AppConfig;
+import com.alan.entity.config.AppConfig;
 import com.alan.controller.basecontroller.BaseController;
 import com.alan.entity.dto.SessionWebUserDto;
 import com.alan.entity.dto.UserSpaceDto;
@@ -15,6 +15,7 @@ import com.alan.exception.BusinessException;
 import com.alan.service.AccountService;
 import com.alan.service.EmailCodeService;
 import com.alan.utils.RedisComponent;
+import com.alan.utils.StringTools;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
- * 用户信息(UserInfo)表控制层
+ * 用户信息(Account)表控制层
  *
  * @author makejava
  * @since 2023-08-28 22:05:29
@@ -86,8 +87,9 @@ public class AccountController extends BaseController {
      * @return
      */
     @PostMapping("sendEmailCode")
+    @GlobalInterceptor(checkLogin = false, checkParams = true)
     public ResponseVO sendEmailCode(HttpSession session,
-                                    @VerifyParam(required = true) String email,
+                                    @VerifyParam(required = true,regex = VerifyRegexEnum.EMAIL) String email,
                                     @VerifyParam(required = true) String checkCode,
                                     @VerifyParam(required = true) Integer type) {
 
@@ -106,6 +108,7 @@ public class AccountController extends BaseController {
     }
 
     @PostMapping("register")
+    @GlobalInterceptor(checkLogin = false, checkParams = true)
     public ResponseVO register(HttpSession session,
                                @VerifyParam(required = true, regex = VerifyRegexEnum.EMAIL) String email,
                                @VerifyParam(required = true, regex = VerifyRegexEnum.PASSWORD, min = 8, max = 18) String password,
@@ -135,8 +138,8 @@ public class AccountController extends BaseController {
      * @param checkCode 验证码
      * @return 登录成功后的用户信息
      */
-    @PostMapping("login")
-    @GlobalInterceptor(checkParams = true)
+    @PostMapping("/login")
+    @GlobalInterceptor(checkLogin = false, checkParams = true)
     public ResponseVO login(HttpSession session,
                             @VerifyParam(required = true) String email,
                             @VerifyParam(required = true) String password,
@@ -159,6 +162,7 @@ public class AccountController extends BaseController {
     }
 
     @PostMapping("resetPwd")
+    @GlobalInterceptor(checkLogin = false, checkParams = true)
     public ResponseVO resetPwd(HttpSession session,
                                @VerifyParam(required = true, regex = VerifyRegexEnum.EMAIL) String email,
                                @VerifyParam(required = true, regex = VerifyRegexEnum.PASSWORD, min = 8, max = 18) String password,
@@ -184,7 +188,8 @@ public class AccountController extends BaseController {
      * @param response 响应
      * @param userId 用户id
      */
-    @GetMapping("getAvatar/{userId}")
+    @RequestMapping("getAvatar/{userId}")
+    @GlobalInterceptor(checkLogin = false, checkParams = true)
     public void getAvatar(HttpServletResponse response,
                                 @VerifyParam(required = true) @PathVariable("userId") String userId) {
         String avatarFolderName = Constants.FILE_FOLDER_FILE + Constants.FILE_FOLDER_AVATAR_NAME;
@@ -236,7 +241,8 @@ public class AccountController extends BaseController {
      * @param session
      * @return 用户信息
      */
-    @GetMapping("getUserInfo")
+    @RequestMapping("getUserInfo")
+    @GlobalInterceptor
     public ResponseVO getUserInfo(HttpSession session) {
         // 从session中获取用户信息
         SessionWebUserDto sessionWebUserDto = getUserInfoFromSession(session);
@@ -245,7 +251,7 @@ public class AccountController extends BaseController {
         return getSuccessResponseVO(sessionWebUserDto);
     }
 
-    @GetMapping("getUseSpace")
+    @PostMapping("getUseSpace")
     public ResponseVO getUseSpace(HttpSession session) {
         // 从session中获取用户信息
         SessionWebUserDto sessionWebUserDto = getUserInfoFromSession(session);
@@ -255,15 +261,18 @@ public class AccountController extends BaseController {
 
 
         // 返回用户信息
-        return getSuccessResponseVO(sessionWebUserDto);
+        return getSuccessResponseVO(spaceDto);
     }
+
+
+
 
     /**
      * 退出登录
      * @param session
      * @return
      */
-    @GetMapping("logout")
+    @RequestMapping("logout")
     public ResponseVO logout(HttpSession session) {
         // 将session中的用户信息清除，invalidate()方法会将session中的所有信息清除
         session.invalidate();
@@ -278,6 +287,7 @@ public class AccountController extends BaseController {
      * @return
      */
     @PostMapping("updateUserAvatar")
+    @GlobalInterceptor
     public ResponseVO updateUserAvatar(HttpSession session, MultipartFile avatar) {
         // 从session中获取用户信息
         SessionWebUserDto webUserDto = getUserInfoFromSession(session);
@@ -317,14 +327,15 @@ public class AccountController extends BaseController {
     }
 
     @PostMapping("updatePassword")
+    @GlobalInterceptor(checkParams = true)
     public ResponseVO updatePassword(HttpSession session,
-                                     @VerifyParam(required = true,regex = VerifyRegexEnum.PASSWORD,min = 8,max = 18) String oldPassword) {
+                                     @VerifyParam(required = true,regex = VerifyRegexEnum.PASSWORD,min = 8,max = 18) String password) {
         // 从session中获取用户信息
         SessionWebUserDto webUserDto = getUserInfoFromSession(session);
 
         // 更新用户密码
         Account account = new Account();
-        account.setPassword(oldPassword);
+        account.setPassword(StringTools.encodeByMD5(password));
 
         // 更新数据库
         accountService.updateUserInfoByUserId(account,webUserDto.getUserId());

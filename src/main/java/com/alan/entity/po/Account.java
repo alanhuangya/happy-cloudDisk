@@ -8,7 +8,7 @@ import java.util.Date;
 import java.io.Serializable;
 
 /**
- * 用户信息(UserInfo)实体类
+ * 用户信息(Account)实体类
  *
  * @author makejava
  * @since 2023-08-28 22:05:31

@@ -1,11 +1,11 @@
 package com.alan.service.impl;
 
-import com.alan.config.AppConfig;
+import com.alan.entity.config.AppConfig;
 import com.alan.entity.constants.Constants;
 import com.alan.entity.dto.SysSettingsDto;
+import com.alan.entity.po.Account;
 import com.alan.exception.BusinessException;
 import com.alan.mapper.AccountMapper;
-import com.alan.entity.po.Account;
 import com.alan.mapper.EmailCodeMapper;
 import com.alan.entity.po.EmailCode;
 import com.alan.service.EmailCodeService;
@@ -63,7 +63,9 @@ public class EmailCodeServiceImpl implements EmailCodeService {
         // 3.发送邮件
         sendEmailCode(email, code);
 
-        // 4.将验证码存入数据库
+        // 4.将邮箱验证码置为失效
+        emailCodeMapper.disableEmailCode(email);
+        // 5.将验证码存入数据库
         EmailCode emailCode = new EmailCode();
         emailCode.setEmail(email);
         emailCode.setCode(code);

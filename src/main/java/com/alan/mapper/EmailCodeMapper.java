@@ -43,10 +43,9 @@ public interface EmailCodeMapper {
     /**
      * 新增数据
      *
-     * @param emailCode 实例对象
      * @return 影响行数
      */
-    int insert(EmailCode emailCode);
+    Integer insert(@Param("bean") EmailCode bean);
 
     /**
      * 批量新增数据（MyBatis原生foreach方法）

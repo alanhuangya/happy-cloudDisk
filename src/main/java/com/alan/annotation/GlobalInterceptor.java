@@ -19,7 +19,13 @@ public @interface GlobalInterceptor {
     /**
      * 校验登录
      *
-     * @return
+     * @return 是否校验登录
      */
     boolean checkLogin() default true;
+
+    /**
+     * 校验管理员
+     * @return 是否校验管理员
+     */
+    boolean checkAdmin() default false;
 }

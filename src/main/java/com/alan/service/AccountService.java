@@ -4,7 +4,7 @@ import com.alan.entity.dto.SessionWebUserDto;
 import com.alan.entity.po.Account;
 
 /**
- * 用户信息(UserInfo)表服务接口
+ * 用户信息(Account)表服务接口
  *
  * @author makejava
  * @since 2023-08-28 22:05:32
@@ -24,5 +24,5 @@ public interface AccountService {
      * @param userId
      * @return
      */
-    Integer updateUserInfoByUserId(Account account, String userId);
+    void updateUserInfoByUserId(Account account, String userId);
 }
